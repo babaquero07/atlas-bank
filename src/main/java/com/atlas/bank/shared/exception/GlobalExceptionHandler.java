@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice // This annotation is used to handle exceptions globally
@@ -62,10 +63,13 @@ public class GlobalExceptionHandler {
 
         problem.setTitle("Validation error");
 
-        List<String> errors = ex.getBindingResult().getFieldErrors()
-                .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .toList();
+        List<String> errors = new ArrayList<>();
+
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error -> errors.add(error.getField() + ": " + error.getDefaultMessage()));
+
+        ex.getBindingResult().getGlobalErrors()
+                        .forEach(error -> errors.add(error.getDefaultMessage()));
 
         problem.setProperty("errors", errors);
 
