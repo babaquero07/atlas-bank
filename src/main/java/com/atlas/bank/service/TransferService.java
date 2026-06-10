@@ -4,17 +4,20 @@ import com.atlas.bank.model.Account;
 import com.atlas.bank.model.Transaction;
 import com.atlas.bank.repository.AccountRepository;
 import com.atlas.bank.repository.TransactionRepository;
+import com.atlas.bank.service.fee.FeeCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TransferService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final List<FeeCalculator> feeCalculators; // To use all implementations of FeeCalculator
 
     @Transactional
     public Transaction execute(Long fromId, Long toId, BigDecimal amount) {
@@ -38,14 +41,11 @@ public class TransferService {
         }
 
         // Calcular comisión — hardcodeada
-        BigDecimal fee;
-        if ("SAVINGS".equals(from.getType())) {
-            fee = amount.multiply(new BigDecimal("0.01"));
-        } else if ("CHECKING".equals(from.getType())) {
-            fee = amount.multiply(new BigDecimal("0.015"));
-        } else {
-            fee = BigDecimal.ZERO;
-        }
+        BigDecimal fee = feeCalculators.stream()
+                .filter(fc -> fc.supports(from.getType()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No hay calculador para el tipo de fee"))
+                .calculate(amount);
 
         // Actualizar saldos
         from.setBalance(from.getBalance().subtract(amount).subtract(fee));
