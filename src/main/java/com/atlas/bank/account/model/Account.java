@@ -23,11 +23,11 @@ public class Account {
     private String type;
     private BigDecimal balance;
     private String status;
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 
     @PrePersist
     public void prePersist() {
-        this.createdDate = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
         if(this.status == null) {
             this.status = "ACTIVE";
         }

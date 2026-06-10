@@ -14,5 +14,5 @@ public class AccountResponse {
     private String type;
     private BigDecimal balance;
     private String status;
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 }

@@ -1,5 +1,8 @@
 package com.atlas.bank.account.controller;
 
+import com.atlas.bank.account.dto.AccountMapper;
+import com.atlas.bank.account.dto.AccountResponse;
+import com.atlas.bank.account.dto.CreateAccountRequest;
 import com.atlas.bank.account.model.Account;
 import com.atlas.bank.account.service.IAccountService;
 import lombok.RequiredArgsConstructor;
@@ -14,25 +17,30 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccountController {
     private final IAccountService accountService;
+    private final AccountMapper accountMapper;
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(Account account) {
-        Account createdAccount = accountService.createAccount(account);
+    public ResponseEntity<AccountResponse> createAccount(@RequestBody CreateAccountRequest accountRequest) {
+        Account account = accountMapper.toEntity(accountRequest);
+         Account saved = accountService.createAccount(account);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAccount);
+         return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toResponse(saved));
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> findAll() {
-        List<Account> accounts = accountService.findAll();
+    public ResponseEntity<List<AccountResponse>> findAll() {
+        List<AccountResponse> accounts = accountService.findAll()
+                .stream()
+                .map(accountMapper::toResponse)
+                .toList();
 
         return ResponseEntity.ok(accounts);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Account> findById(@PathVariable Long id) {
+    public ResponseEntity<AccountResponse> findById(@PathVariable Long id) {
         Account account = accountService.findById(id);
 
-        return ResponseEntity.ok(account);
+        return ResponseEntity.ok(accountMapper.toResponse(account));
     }
 }
