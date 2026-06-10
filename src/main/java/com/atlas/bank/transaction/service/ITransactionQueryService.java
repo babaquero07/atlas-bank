@@ -1,6 +1,6 @@
-package com.atlas.bank.service;
+package com.atlas.bank.transaction.service;
 
-import com.atlas.bank.model.Transaction;
+import com.atlas.bank.transaction.model.Transaction;
 
 import java.util.List;
 

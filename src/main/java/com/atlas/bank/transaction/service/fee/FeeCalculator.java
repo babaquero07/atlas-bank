@@ -1,4 +1,4 @@
-package com.atlas.bank.service.fee;
+package com.atlas.bank.transaction.service.fee;
 
 import java.math.BigDecimal;
 
