@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -31,7 +30,7 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Account> findById(Long id) {
+    public ResponseEntity<Account> findById(@PathVariable Long id) {
         Account account = accountService.findById(id);
 
         return ResponseEntity.ok(account);
