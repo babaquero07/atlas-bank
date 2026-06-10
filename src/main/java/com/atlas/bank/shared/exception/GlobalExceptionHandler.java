@@ -5,8 +5,11 @@ import com.atlas.bank.transaction.exception.AccountNotActiveException;
 import com.atlas.bank.transaction.exception.InsufficientFundsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
 
 @RestControllerAdvice // This annotation is used to handle exceptions globally
 public class GlobalExceptionHandler {
@@ -43,7 +46,6 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneral(Exception ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
@@ -51,6 +53,22 @@ public class GlobalExceptionHandler {
         );
 
         problem.setTitle("Internal server error");
+        return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+
+        problem.setTitle("Validation error");
+
+        List<String> errors = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .toList();
+
+        problem.setProperty("errors", errors);
+
         return problem;
     }
 }
