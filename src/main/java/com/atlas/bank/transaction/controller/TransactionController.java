@@ -1,5 +1,8 @@
 package com.atlas.bank.transaction.controller;
 
+import com.atlas.bank.transaction.dto.TransactionMapper;
+import com.atlas.bank.transaction.dto.TransactionResponse;
+import com.atlas.bank.transaction.dto.TransferRequest;
 import com.atlas.bank.transaction.model.Transaction;
 import com.atlas.bank.transaction.service.ITransactionQueryService;
 import com.atlas.bank.transaction.service.ITransferService;
@@ -7,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -16,20 +18,25 @@ import java.util.List;
 public class TransactionController {
     private final ITransferService transferService;
     private final ITransactionQueryService transactionQueryService;
+    private final TransactionMapper transactionMapper;
 
     @PostMapping("/transfer")
-    public ResponseEntity<Transaction> transfer(@RequestParam Long fromId,
-                                                @RequestParam Long toId,
-                                                @RequestParam BigDecimal amount) {
-        Transaction transaction = transferService.execute(fromId, toId, amount);
+    public ResponseEntity<TransactionResponse> transfer(@RequestBody TransferRequest transferRequest) {
+        Transaction transaction = transferService.execute(
+                transferRequest.getFromAccountId(),
+                transferRequest.getToAccountId(),
+                transferRequest.getAmount()
+        );
 
-
-        return ResponseEntity.ok(transaction);
+        return ResponseEntity.ok(transactionMapper.toResponse(transaction));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<Transaction>> getTransactions(@PathVariable Long id) {
-        List<Transaction> transactions = transactionQueryService.getByAccountId(id);
+    public ResponseEntity<List<TransactionResponse>> getTransactions(@PathVariable Long id) {
+        List<TransactionResponse> transactions = transactionQueryService.getByAccountId(id)
+                .stream()
+                .map(transactionMapper::toResponse)
+                .toList();
 
         return ResponseEntity.ok(transactions);
     }
