@@ -8,7 +8,6 @@ import com.atlas.bank.transaction.model.Transaction;
 import com.atlas.bank.account.repository.AccountRepository;
 import com.atlas.bank.transaction.repository.TransactionRepository;
 import com.atlas.bank.transaction.service.fee.FeeCalculator;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,53 +15,65 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
-public class TransferService implements ITransferService {
+public class TransferService extends TransactionProcessor<TransferContext> implements ITransferService {
     private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
     private final List<FeeCalculator> feeCalculators; // To use all implementations of FeeCalculator
+
+    public TransferService(TransactionRepository transactionRepository, AccountRepository accountRepository,
+                           List<FeeCalculator> feeCalculators) {
+        super(transactionRepository);
+        this.accountRepository = accountRepository;
+        this.feeCalculators = feeCalculators;
+    }
 
     @Override
     @Transactional
     public Transaction execute(Long fromId, Long toId, BigDecimal amount) {
-        // Buscar cuentas
         Account from = accountRepository.findById(fromId)
                 .orElseThrow(() -> new AccountNotFoundException(fromId));
         Account to = accountRepository.findById(toId)
                 .orElseThrow(() -> new AccountNotFoundException(toId));
 
-        // Validar que la cuenta esté activa
-        if (!"ACTIVE".equals(from.getStatus())) {
-            throw new AccountNotActiveException(fromId, from.getStatus());
-        }
-        if (!"ACTIVE".equals(to.getStatus())) {
-            throw new AccountNotActiveException(toId, to.getStatus());
-        }
+       return process(new TransferContext(from, to, amount));
+    }
 
-        // Validar fondos
-        if (from.getBalance().compareTo(amount) < 0) {
-            throw new InsufficientFundsException(fromId, from.getBalance(), amount);
+    @Override
+    protected void validate(TransferContext ctx) {
+        if (!"ACTIVE".equals(ctx.from().getStatus())) {
+            throw new AccountNotActiveException(ctx.from().getId(), ctx.from().getStatus());
         }
+        if (!"ACTIVE".equals(ctx.to().getStatus())) {
+            throw new AccountNotActiveException(ctx.to().getId(), ctx.to().getStatus());
+        }
+        if (ctx.from().getBalance().compareTo(ctx.amount()) < 0) {
+            throw new InsufficientFundsException(ctx.from().getId(), ctx.from().getBalance(), ctx.amount());
+        }
+    }
 
-        // Calcular comisión — hardcodeada
-        BigDecimal fee = feeCalculators.stream()
-                .filter(fc -> fc.supports(from.getType()))
+    @Override
+    protected BigDecimal calculateFee(TransferContext ctx) {
+      return feeCalculators.stream()
+                .filter(fc -> fc.supports(ctx.from().getType()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No hay calculador para el tipo de fee"))
-                .calculate(amount);
+                .calculate(ctx.amount());
+    }
 
-        // Actualizar saldos
-        from.setBalance(from.getBalance().subtract(amount).subtract(fee));
-        to.setBalance(to.getBalance().add(amount));
-        accountRepository.save(from);
-        accountRepository.save(to);
+    @Override
+    protected void execute(TransferContext ctx, BigDecimal fee) {
+        ctx.from().setBalance(ctx.from().getBalance().subtract(ctx.amount()).subtract(fee));
+        ctx.to().setBalance(ctx.to().getBalance().add(ctx.amount()));
+        accountRepository.save(ctx.from());
+        accountRepository.save(ctx.to());
+    }
 
-        // Crear transacción
+    @Override
+    protected Transaction save(TransferContext ctx, BigDecimal fee) {
         Transaction transaction = new Transaction();
         transaction.setType("TRANSFER");
-        transaction.setSourceAccountId(fromId);
-        transaction.setTargetAccountId(toId);
-        transaction.setAmount(amount);
+        transaction.setSourceAccountId(ctx.from().getId());
+        transaction.setTargetAccountId(ctx.to().getId());
+        transaction.setAmount(ctx.amount());
         transaction.setFee(fee);
         transaction.setStatus("EXECUTED");
 
