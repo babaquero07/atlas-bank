@@ -11,6 +11,5 @@ public interface AccountMapper {
     @Mapping( target = "createdAt", ignore = true)
     Account toEntity(CreateAccountRequest request);
 
-
     AccountResponse toResponse(Account account);
 }
