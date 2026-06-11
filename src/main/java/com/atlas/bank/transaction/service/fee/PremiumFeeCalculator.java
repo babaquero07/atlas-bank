@@ -7,14 +7,14 @@ import java.math.BigDecimal;
 
 @Component
 @Order(1)
-public class CheckingFeeCalculator implements FeeCalculator {
+public class PremiumFeeCalculator implements FeeCalculator {
     @Override
     public boolean supports(String accountType) {
-        return accountType.equalsIgnoreCase("CHECKING");
+        return "PREMIUM".equals(accountType);
     }
 
     @Override
     public BigDecimal calculate(BigDecimal amount) {
-        return amount.multiply(new BigDecimal("0.015"));
+        return BigDecimal.ZERO;
     }
 }
