@@ -1,0 +1,21 @@
+package com.atlas.bank.transaction.validation.chain;
+
+import com.atlas.bank.account.model.AccountStatus;
+import com.atlas.bank.transaction.exception.AccountNotActiveException;
+import com.atlas.bank.transaction.service.transfer.TransferContext;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Order(1) // This ensures that this class is the first one to be executed
+public class AccountStatusValidator implements TransferValidator {
+    @Override
+    public void validate(TransferContext ctx) {
+        if (ctx.from().getStatus() != AccountStatus.ACTIVE) {
+            throw new AccountNotActiveException(ctx.from().getId(), ctx.from().getStatus().name());
+        }
+        if (ctx.to().getStatus() != AccountStatus.ACTIVE) {
+            throw new AccountNotActiveException(ctx.to().getId(), ctx.to().getStatus().name());
+        }
+    }
+}
