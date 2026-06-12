@@ -1,4 +1,4 @@
-package com.atlas.bank.transaction.service;
+package com.atlas.bank.transaction.service.transfer;
 
 import com.atlas.bank.account.exception.AccountNotFoundException;
 import com.atlas.bank.account.model.Account;
@@ -7,6 +7,7 @@ import com.atlas.bank.transaction.exception.InsufficientFundsException;
 import com.atlas.bank.transaction.model.Transaction;
 import com.atlas.bank.account.repository.AccountRepository;
 import com.atlas.bank.transaction.repository.TransactionRepository;
+import com.atlas.bank.transaction.service.factory.TransactionFactory;
 import com.atlas.bank.transaction.service.fee.FeeCalculator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,13 +70,7 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
 
     @Override
     protected Transaction save(TransferContext ctx, BigDecimal fee) {
-        Transaction transaction = new Transaction();
-        transaction.setType("TRANSFER");
-        transaction.setSourceAccountId(ctx.from().getId());
-        transaction.setTargetAccountId(ctx.to().getId());
-        transaction.setAmount(ctx.amount());
-        transaction.setFee(fee);
-        transaction.setStatus("EXECUTED");
+        Transaction transaction = TransactionFactory.createTransfer(ctx, fee);
 
         return transactionRepository.save(transaction);
     }
