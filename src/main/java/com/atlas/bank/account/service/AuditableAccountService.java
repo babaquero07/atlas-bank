@@ -3,14 +3,12 @@ package com.atlas.bank.account.service;
 import com.atlas.bank.account.model.Account;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Slf4j
 @Component
-@Primary // This annotation is used to mark the primary bean
 public class AuditableAccountService implements IAccountService {
     private final IAccountService delegate;
 
