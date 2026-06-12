@@ -3,7 +3,9 @@ package com.atlas.bank.account.controller;
 import com.atlas.bank.account.dto.AccountMapper;
 import com.atlas.bank.account.dto.AccountResponse;
 import com.atlas.bank.account.dto.CreateAccountRequest;
+import com.atlas.bank.account.dto.DashboardResponse;
 import com.atlas.bank.account.model.Account;
+import com.atlas.bank.account.service.AccountDashboardFacade;
 import com.atlas.bank.account.service.IAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +21,19 @@ import java.util.List;
 public class AccountController {
     private final IAccountService accountService;
     private final AccountMapper accountMapper;
+    private final AccountDashboardFacade accountDashboardFacade;
+
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<DashboardResponse> getDashboard(@PathVariable Long id) {
+        return ResponseEntity.ok(accountDashboardFacade.getDashboard(id));
+    }
 
     @PostMapping
     public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest accountRequest) {
         Account account = accountMapper.toEntity(accountRequest);
-         Account saved = accountService.createAccount(account);
+        Account saved = accountService.createAccount(account);
 
-         return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toResponse(saved));
     }
 
     @GetMapping
