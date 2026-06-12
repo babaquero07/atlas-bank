@@ -28,14 +28,16 @@ public class Account {
     @Column(nullable = false)
     private String email;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String type;
+    private AccounType type;
 
     @Column(nullable = false)
     private BigDecimal balance;
 
     @Column(nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -44,7 +46,7 @@ public class Account {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         if(this.status == null) {
-            this.status = "ACTIVE";
+            this.status = AccountStatus.ACTIVE;
         }
         if(this.balance == null) {
             this.balance = BigDecimal.ZERO;

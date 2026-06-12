@@ -1,7 +1,9 @@
 package com.atlas.bank.account.dto;
 
+import com.atlas.bank.account.model.AccounType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
@@ -19,8 +21,8 @@ public class CreateAccountRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Account type is required")
-    private String type;
+    @NotNull(message = "Account type is required")
+    private AccounType type;
 
     @PositiveOrZero(message = "Balance must be a positive number")
     private BigDecimal balance;

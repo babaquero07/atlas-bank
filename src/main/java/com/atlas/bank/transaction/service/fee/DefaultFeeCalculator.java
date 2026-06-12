@@ -1,5 +1,6 @@
 package com.atlas.bank.transaction.service.fee;
 
+import com.atlas.bank.account.model.AccounType;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 @Order() // This ensures that this class is the last one to be executed
 public class DefaultFeeCalculator implements FeeCalculator {
     @Override
-    public boolean supports(String accountType) {
+    public boolean supports(AccounType accountType) {
         return true;
     }
 
