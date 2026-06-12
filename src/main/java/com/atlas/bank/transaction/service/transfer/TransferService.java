@@ -9,8 +9,11 @@ import com.atlas.bank.transaction.model.Transaction;
 import com.atlas.bank.account.repository.AccountRepository;
 import com.atlas.bank.transaction.repository.TransactionRepository;
 import com.atlas.bank.transaction.service.event.TransactionExecutedEvent;
+import com.atlas.bank.transaction.service.exception.FraudCheckException;
 import com.atlas.bank.transaction.service.factory.TransactionFactory;
 import com.atlas.bank.transaction.service.fee.FeeCalculator;
+import com.atlas.bank.transaction.service.fraud.FraudCheckResult;
+import com.atlas.bank.transaction.service.fraud.FraudChecker;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +26,19 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     private final AccountRepository accountRepository;
     private final List<FeeCalculator> feeCalculators; // To use all implementations of FeeCalculator
     private final ApplicationEventPublisher eventPublisher;
+    private final FraudChecker fraudChecker;
 
-    public TransferService(TransactionRepository transactionRepository,
-                           AccountRepository accountRepository,
-                           List<FeeCalculator> feeCalculators,
-                           ApplicationEventPublisher applicationEventPublisher
-                           ) {
+    public TransferService(
+            TransactionRepository transactionRepository,
+            AccountRepository accountRepository,
+            List<FeeCalculator> feeCalculators,
+            ApplicationEventPublisher eventPublisher,
+            FraudChecker fraudChecker) {
         super(transactionRepository);
         this.accountRepository = accountRepository;
         this.feeCalculators = feeCalculators;
-        this.eventPublisher = applicationEventPublisher;
+        this.eventPublisher = eventPublisher;
+        this.fraudChecker = fraudChecker;
     }
 
     @Override
@@ -67,6 +73,11 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
         }
         if (ctx.from().getBalance().compareTo(ctx.amount()) < 0) {
             throw new InsufficientFundsException(ctx.from().getId(), ctx.from().getBalance(), ctx.amount());
+        }
+
+        FraudCheckResult fraudCheckResult = fraudChecker.check(ctx.from().getId(), ctx.amount());
+        if(fraudCheckResult.blocked()) {
+            throw new FraudCheckException(fraudCheckResult.reason());
         }
     }
 

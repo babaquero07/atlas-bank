@@ -3,6 +3,7 @@ package com.atlas.bank.shared.exception;
 import com.atlas.bank.account.exception.AccountNotFoundException;
 import com.atlas.bank.transaction.exception.AccountNotActiveException;
 import com.atlas.bank.transaction.exception.InsufficientFundsException;
+import com.atlas.bank.transaction.service.exception.FraudCheckException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -68,4 +69,14 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler(FraudCheckException.class)
+    public ProblemDetail handleFraudCheck(FraudCheckException ex){
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatusCode.valueOf(422), ex.getMessage()
+        );
+
+        problem.setTitle("Operación bloqueada por fraude");
+
+        return problem;
+    }
 }
