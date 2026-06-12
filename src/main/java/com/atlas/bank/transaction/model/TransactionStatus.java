@@ -1,5 +1,9 @@
 package com.atlas.bank.transaction.model;
 
 public enum TransactionStatus {
-    EXECUTED
+    EXECUTED,
+    VALIDATED,
+    PENDING,
+    REJECTED,
+    REVERSED
 }
