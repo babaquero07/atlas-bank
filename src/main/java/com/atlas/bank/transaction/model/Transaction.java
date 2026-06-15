@@ -1,5 +1,6 @@
 package com.atlas.bank.transaction.model;
 
+import com.atlas.bank.transaction.model.state.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +20,7 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private TransactionType type; // DEPOSIT, WITHDRAWAL, TRANSFER
+    private TransactionType type;
 
     @Column(name = "source_account_id")
     private Long sourceAccountId;
@@ -35,14 +36,36 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private TransactionStatus status; // PENDING, EXECUTED, REJECTED
+    private TransactionStatus status;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Transient // No queremos que se persista en la base de datos
+    private TransactionState state;
 
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) this.status = TransactionStatus.EXECUTED;
+    }
+
+    public TransactionState getState() {
+        if(state == null) {
+            state = switch (status) {
+                 case PENDING -> new PendingState();
+                 case VALIDATED ->  new ValidatedState();
+                 case EXECUTED ->  new ExecutedState();
+                 case REJECTED ->  new RejectedState();
+                 case REVERSED ->  new ReversedState();
+            };
+        }
+
+        return state;
+    }
+
+    public void advanceTo(TransactionState newState) {
+        state = newState;
+        status = newState.status();
     }
 }

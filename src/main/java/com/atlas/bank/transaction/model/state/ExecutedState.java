@@ -9,4 +9,9 @@ public record ExecutedState(
     public TransactionStatus status() {
         return TransactionStatus.EXECUTED;
     }
+
+    @Override
+    public TransactionState reverse() {
+        return new ReversedState();
+    }
 }

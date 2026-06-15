@@ -9,4 +9,14 @@ public record PendingState(
     public TransactionStatus status() {
         return TransactionStatus.PENDING;
     }
+
+    @Override
+    public TransactionState validate() {
+        return new ValidatedState();
+    }
+
+    @Override
+    public TransactionState reject(String reason) {
+        return new RejectedState();
+    }
 }

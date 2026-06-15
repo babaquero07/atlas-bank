@@ -9,4 +9,14 @@ public record ValidatedState(
     public TransactionStatus status() {
         return TransactionStatus.VALIDATED;
     }
+
+    @Override
+    public TransactionState execute() {
+        return new ExecutedState();
+    }
+
+    @Override
+    public TransactionState reject(String reason) {
+        return new RejectedState();
+    }
 }
