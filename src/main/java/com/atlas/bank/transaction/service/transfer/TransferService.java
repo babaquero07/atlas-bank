@@ -9,6 +9,7 @@ import com.atlas.bank.transaction.exception.InsufficientFundsException;
 import com.atlas.bank.transaction.model.Transaction;
 import com.atlas.bank.account.repository.AccountRepository;
 import com.atlas.bank.transaction.repository.TransactionRepository;
+import com.atlas.bank.transaction.service.domain.TransferDomainService;
 import com.atlas.bank.transaction.service.event.TransactionExecutedEvent;
 import com.atlas.bank.transaction.service.exception.FraudCheckException;
 import com.atlas.bank.transaction.service.factory.TransactionFactory;
@@ -29,18 +30,21 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
     private final List<FeeCalculator> feeCalculators; // To use all implementations of FeeCalculator
     private final ApplicationEventPublisher eventPublisher;
     private final List<TransferValidator> transferValidators;
+    private final TransferDomainService transferDomainService;
 
     public TransferService(
             TransactionRepository transactionRepository,
             AccountRepository accountRepository,
             List<FeeCalculator> feeCalculators,
             ApplicationEventPublisher eventPublisher,
-            List<TransferValidator> transferValidators) {
+            List<TransferValidator> transferValidators,
+            TransferDomainService transferDomainService) {
         super(transactionRepository);
         this.accountRepository = accountRepository;
         this.feeCalculators = feeCalculators;
         this.eventPublisher = eventPublisher;
         this.transferValidators = transferValidators;
+        this.transferDomainService = transferDomainService;
     }
 
     @Override
@@ -85,11 +89,7 @@ public class TransferService extends TransactionProcessor<TransferContext> imple
 
     @Override
     protected void execute(TransferContext ctx, BigDecimal fee) {
-        BigDecimal newFromBalance = ctx.from().getBalance().getAmount().subtract(ctx.amount()).subtract(fee);
-        ctx.from().setBalance(Money.of(newFromBalance, ctx.from().getBalance().getCurrency()));
-
-        BigDecimal newToBalance = ctx.to().getBalance().getAmount().add(ctx.amount());
-        ctx.to().setBalance(Money.of(newToBalance, ctx.to().getBalance().getCurrency()));
+        transferDomainService.transfer(ctx.from(), ctx.to(), ctx.amount(), fee);
 
         accountRepository.save(ctx.from());
         accountRepository.save(ctx.to());
