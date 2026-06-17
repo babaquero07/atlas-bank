@@ -1,5 +1,6 @@
 package com.atlas.bank.transaction.controller;
 
+import com.atlas.bank.application.port.in.TransferMoneyUseCase;
 import com.atlas.bank.transaction.dto.TransactionMapper;
 import com.atlas.bank.transaction.dto.TransactionResponse;
 import com.atlas.bank.transaction.dto.TransferRequest;
@@ -17,13 +18,13 @@ import java.util.List;
 @RequestMapping("/api/v1/transactions")
 @RequiredArgsConstructor
 public class TransactionController {
-    private final ITransferService transferService;
+    private final TransferMoneyUseCase transferMoneyUseCase;
     private final ITransactionQueryService transactionQueryService;
     private final TransactionMapper transactionMapper;
 
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponse> transfer(@Valid @RequestBody TransferRequest transferRequest) {
-        Transaction transaction = transferService.execute(
+        Transaction transaction = transferMoneyUseCase.execute(
                 transferRequest.getFromAccountId(),
                 transferRequest.getToAccountId(),
                 transferRequest.getAmount()
