@@ -1,5 +1,7 @@
 package com.atlas.bank.account.model;
 
+import com.atlas.bank.shared.model.Currency;
+import com.atlas.bank.shared.model.Money;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,8 +34,12 @@ public class Account {
     @Column(nullable = false, length = 20)
     private AccounType type;
 
-    @Column(nullable = false)
-    private BigDecimal balance;
+    @Embedded // Para almacenar el balance como un solo campo en la base de datos
+    @AttributeOverrides({ // Para especificar el nombre de la columna en la base de datos
+            @AttributeOverride(name = "amount", column = @Column(name = "balance_amount", nullable = false)),
+            @AttributeOverride(name = "currency", column = @Column(name = "balance_currency", nullable = false, length = 3))
+    })
+    private Money balance;
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
@@ -49,7 +55,7 @@ public class Account {
             this.status = AccountStatus.ACTIVE;
         }
         if(this.balance == null) {
-            this.balance = BigDecimal.ZERO;
+            this.balance = Money.zero(Currency.USD);
         }
     }
 }
