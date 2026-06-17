@@ -1,6 +1,7 @@
 package com.atlas.bank.account.model;
 
 import com.atlas.bank.shared.model.Currency;
+import com.atlas.bank.shared.model.Email;
 import com.atlas.bank.shared.model.Money;
 import com.atlas.bank.transaction.exception.InsufficientFundsException;
 import jakarta.persistence.*;
@@ -28,8 +29,11 @@ public class Account {
     @Column(name = "owner_name", nullable = false)
     private String ownerName;
 
-    @Column(nullable = false)
-    private String email;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false)),
+    })
+    private Email email;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -37,8 +41,8 @@ public class Account {
 
     @Embedded // Para almacenar el balance como un solo campo en la base de datos
     @AttributeOverrides({ // Para especificar el nombre de la columna en la base de datos
-            @AttributeOverride(name = "amount", column = @Column(name = "balance_amount", nullable = false)),
-            @AttributeOverride(name = "currency", column = @Column(name = "balance_currency", nullable = false, length = 3))
+            @AttributeOverride(name = "amount", column = @Column(name = "balance", nullable = false)),
+            @AttributeOverride(name = "currency", column = @Column(name = "currency", nullable = false, length = 3))
     })
     private Money balance;
 

@@ -1,5 +1,6 @@
 package com.atlas.bank.customer.model;
 
+import com.atlas.bank.shared.model.Email;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,8 +21,11 @@ public class Customer {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false)),
+    })
+    private Email email;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
