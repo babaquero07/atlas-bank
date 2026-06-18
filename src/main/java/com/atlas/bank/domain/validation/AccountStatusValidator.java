@@ -3,11 +3,7 @@ package com.atlas.bank.domain.validation;
 import com.atlas.bank.domain.model.account.AccountStatus;
 import com.atlas.bank.domain.exception.AccountNotActiveException;
 import com.atlas.bank.domain.model.transaction.TransferContext;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
-@Component
-@Order(1) // This ensures that this class is the first one to be executed
 public class AccountStatusValidator implements TransferValidator {
     @Override
     public void validate(TransferContext ctx) {
