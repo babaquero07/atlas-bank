@@ -1,4 +1,4 @@
-package com.atlas.bank.shared.exception.config;
+package com.atlas.bank.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

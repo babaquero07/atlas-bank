@@ -1,4 +1,4 @@
-package com.atlas.bank.shared.model;
+package com.atlas.bank.infrastructure.adapter.out.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
