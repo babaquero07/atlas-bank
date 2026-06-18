@@ -2,9 +2,7 @@ package com.atlas.bank.domain.model.transaction;
 
 import com.atlas.bank.domain.model.transaction.state.*;
 import com.atlas.bank.domain.event.TransactionExecutedEvent;
-import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.domain.AbstractAggregateRoot;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

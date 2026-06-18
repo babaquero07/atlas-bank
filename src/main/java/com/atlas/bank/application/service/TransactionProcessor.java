@@ -1,15 +1,15 @@
-package com.atlas.bank.transaction.service.transfer;
+package com.atlas.bank.application.service;
 
+import com.atlas.bank.application.port.out.TransactionRepositoryPort;
 import com.atlas.bank.domain.model.transaction.Transaction;
-import com.atlas.bank.transaction.repository.TransactionRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
 public abstract class TransactionProcessor<C> {
-    protected  final TransactionRepository transactionRepository;
+    protected  final TransactionRepositoryPort transactionRepository;
 
     @Transactional
     public Transaction process(C context) {
