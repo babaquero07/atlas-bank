@@ -1,4 +1,4 @@
-package com.atlas.bank.account.service;
+package com.atlas.bank.application.service;
 
 import com.atlas.bank.domain.model.account.Account;
 import lombok.extern.slf4j.Slf4j;

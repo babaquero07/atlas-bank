@@ -1,4 +1,4 @@
-package com.atlas.bank.account.service;
+package com.atlas.bank.application.service;
 
 import com.atlas.bank.application.port.out.AccountRepositoryPort;
 import com.atlas.bank.domain.exception.AccountNotFoundException;
