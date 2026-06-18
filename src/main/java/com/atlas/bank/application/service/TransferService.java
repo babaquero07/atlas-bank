@@ -40,7 +40,7 @@ public class TransferService extends TransactionProcessor<TransferContext>
 
     @Override
     @Transactional
-    public Transaction execute(Long fromId, Long toId, BigDecimal amount) {
+    public Transaction transfer(Long fromId, Long toId, BigDecimal amount) {
         Account from = accountRepository.findById(fromId)
                 .orElseThrow(() -> new AccountNotFoundException(fromId));
         Account to = accountRepository.findById(toId)
