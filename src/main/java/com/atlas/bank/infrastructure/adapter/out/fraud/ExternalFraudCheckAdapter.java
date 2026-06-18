@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Component
 @Slf4j
-public class ExternalFraudCheckAdapter implements FraudChecker, FraudCheckPort {
+public class ExternalFraudCheckAdapter implements FraudCheckPort {
     @Override
     public FraudCheckResult check(Long accountId, BigDecimal amount) {
         ExternalFraudResponse res = callExternalApi(accountId, amount);
