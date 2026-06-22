@@ -1,11 +1,12 @@
-package com.atlas.bank.infrastructure.adapter.in.rest;
+package com.atlas.bank.application.facade;
 
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.GetTransactionsByAccountUseCase;
+import com.atlas.bank.application.query.GetAccountStatementQuery;
+import com.atlas.bank.application.query.TransactionReadModel;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.DashboardResponse;
 import com.atlas.bank.domain.model.account.Account;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransactionMapper;
-import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransactionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +22,8 @@ public class AccountDashboardFacade {
     public DashboardResponse getDashboard(Long accountId) {
         Account account = getAccountUseCase.findById(accountId);
 
-        List<TransactionResponse> transactions = getTransactionByAccountUseCase
-                .getByAccountId(accountId)
-                .stream()
-                .map(transactionMapper::toResponse)
-                .toList();
+        List<TransactionReadModel> transactions = getTransactionByAccountUseCase
+                .getByAccountId(new GetAccountStatementQuery(accountId));
 
         return DashboardResponse.builder()
                 .accountId(account.getId())
