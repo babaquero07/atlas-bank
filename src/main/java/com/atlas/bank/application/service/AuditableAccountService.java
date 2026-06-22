@@ -1,5 +1,6 @@
 package com.atlas.bank.application.service;
 
+import com.atlas.bank.application.command.CreateAccountCommand;
 import com.atlas.bank.application.port.in.CreateAccountUseCase;
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.ListAccountsUseCase;
@@ -28,10 +29,10 @@ public class AuditableAccountService implements CreateAccountUseCase, ListAccoun
     }
 
     @Override
-    public Account create(Account account) {
-        log.info("AuditableAccountService: Creating account {}", account);
+    public Account create(CreateAccountCommand command) {
+        log.info("AuditableAccountService: Creating account {}", command);
 
-        Account created = createAccountUseCase.create(account);
+        Account created = createAccountUseCase.create(command);
         log.info("AuditableAccountService: Created account {}", created.getId());
 
         return created;
