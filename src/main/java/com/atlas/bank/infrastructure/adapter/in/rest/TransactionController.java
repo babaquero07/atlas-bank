@@ -1,5 +1,6 @@
 package com.atlas.bank.infrastructure.adapter.in.rest;
 
+import com.atlas.bank.application.command.TransferMoneyCommand;
 import com.atlas.bank.application.port.in.GetTransactionsByAccountUseCase;
 import com.atlas.bank.application.port.in.TransferMoneyUseCase;
 import com.atlas.bank.infrastructure.adapter.in.rest.dto.TransactionMapper;
@@ -23,11 +24,14 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponse> transfer(@Valid @RequestBody TransferRequest transferRequest) {
-        Transaction transaction = transferMoneyUseCase.transfer(
-                transferRequest.getFromAccountId(),
-                transferRequest.getToAccountId(),
-                transferRequest.getAmount()
-        );
+        TransferMoneyCommand command = TransferMoneyCommand
+                .builder()
+                .toId(transferRequest.getToAccountId())
+                .fromId(transferRequest.getToAccountId())
+                .amount(transferRequest.getAmount())
+                .build();
+
+        Transaction transaction = transferMoneyUseCase.transfer(command);
 
         return ResponseEntity.ok(transactionMapper.toResponse(transaction));
     }

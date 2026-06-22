@@ -1,5 +1,6 @@
 package com.atlas.bank.application.service;
 
+import com.atlas.bank.application.command.TransferMoneyCommand;
 import com.atlas.bank.application.port.out.TransactionRepositoryPort;
 import com.atlas.bank.domain.exception.AccountNotFoundException;
 import com.atlas.bank.domain.model.account.Account;
@@ -40,13 +41,13 @@ public class TransferService extends TransactionProcessor<TransferContext>
 
     @Override
     @Transactional
-    public Transaction transfer(Long fromId, Long toId, BigDecimal amount) {
-        Account from = accountRepository.findById(fromId)
-                .orElseThrow(() -> new AccountNotFoundException(fromId));
-        Account to = accountRepository.findById(toId)
-                .orElseThrow(() -> new AccountNotFoundException(toId));
+    public Transaction transfer(TransferMoneyCommand command) {
+        Account from = accountRepository.findById(command.fromId())
+                .orElseThrow(() -> new AccountNotFoundException(command.fromId()));
+        Account to = accountRepository.findById(command.toId())
+                .orElseThrow(() -> new AccountNotFoundException(command.toId()));
 
-       Transaction transaction = process(new TransferContext(from, to, amount));
+       Transaction transaction = process(new TransferContext(from, to, command.amount()));
 
        transaction.executeTransfer();
        transactionRepository.save(transaction);
