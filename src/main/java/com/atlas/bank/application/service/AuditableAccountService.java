@@ -1,6 +1,8 @@
 package com.atlas.bank.application.service;
 
+import com.atlas.bank.application.command.CloseAccountCommand;
 import com.atlas.bank.application.command.CreateAccountCommand;
+import com.atlas.bank.application.port.in.CloseAccountUseCase;
 import com.atlas.bank.application.port.in.CreateAccountUseCase;
 import com.atlas.bank.application.port.in.GetAccountUseCase;
 import com.atlas.bank.application.port.in.ListAccountsUseCase;
@@ -13,19 +15,22 @@ import java.util.List;
 
 @Slf4j
 @Component
-@Primary // This annotation is used to mark the primary bean
-public class AuditableAccountService implements CreateAccountUseCase, ListAccountsUseCase, GetAccountUseCase {
+@Primary
+public class AuditableAccountService implements CreateAccountUseCase, ListAccountsUseCase, GetAccountUseCase, CloseAccountUseCase {
     private final CreateAccountUseCase createAccountUseCase;
     private final ListAccountsUseCase listAccountsUseCase;
     private final GetAccountUseCase getAccountUseCase;
+    private final CloseAccountUseCase closeAccountUseCase;
 
     public AuditableAccountService(
             CreateAccountUseCase createAccountUseCase,
             ListAccountsUseCase listAccountsUseCase,
-            GetAccountUseCase getAccountUseCase) {
+            GetAccountUseCase getAccountUseCase,
+            CloseAccountUseCase closeAccountUseCase) {
         this.createAccountUseCase = createAccountUseCase;
         this.listAccountsUseCase = listAccountsUseCase;
         this.getAccountUseCase = getAccountUseCase;
+        this.closeAccountUseCase = closeAccountUseCase;
     }
 
     @Override
@@ -50,5 +55,15 @@ public class AuditableAccountService implements CreateAccountUseCase, ListAccoun
         log.info("AuditableAccountService: Finding account by id {}", id);
 
         return getAccountUseCase.findById(id);
+    }
+
+    @Override
+    public Account close(CloseAccountCommand command) {
+        log.info("AuditableAccountService: Closing account {}", command.accountId());
+
+        Account closed = closeAccountUseCase.close(command);
+        log.info("AuditableAccountService: Closed account {}", closed.getId());
+
+        return closed;
     }
 }
